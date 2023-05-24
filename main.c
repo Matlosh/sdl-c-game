@@ -13,6 +13,8 @@ int main(int argc, char *argv[]) {
     if(init(&main_window, &renderer)) return 1;
     if(load_game_objects()) return 1;
     prepare_ui();
+    prepare_player();
+    printf("%d\n", player.player_x_pos);
 
     SDL_Event event;
 

@@ -1,15 +1,16 @@
 #include "player.h"
 
-int player_width = 100;
-int player_height = 100;
-int player_x_pos = 450;
-int player_y_pos = 600;
-short int left_movement = 0;
-short int right_movement = 0;
-short int can_jump = 1;
+void prepare_player() {
+    Player player_init = {.player_width = 100, .player_height = 100,
+        .player_x_pos = SCREEN_WIDTH / 2 - (100 / 2),
+        .player_y_pos = SCREEN_HEIGHT - 100,
+        .left_movement = 0, .right_movement = 0, .can_jump = 1,
+        .max_health = 100, .health = 47};
+    player = player_init;
+}
 
 int render_player() {
-    SDL_Rect fillRect = { player_x_pos, player_y_pos, player_width, player_height };
+    SDL_Rect fillRect = { player.player_x_pos, player.player_y_pos, player.player_width, player.player_height };
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderFillRect(renderer, &fillRect);
 }
@@ -20,15 +21,15 @@ void process_player_movement(SDL_Event *event) {
         case SDL_KEYDOWN:
             switch(event->key.keysym.sym) {
                 case SDLK_w:
-                    can_jump = 0;
+                    player.can_jump = 0;
                 break;
 
                 case SDLK_a:
-                    left_movement = 1;
+                    player.left_movement = 1;
                 break;
 
                 case SDLK_d:
-                    right_movement = 1;
+                    player.right_movement = 1;
                 break;
             }
         break;
@@ -36,11 +37,11 @@ void process_player_movement(SDL_Event *event) {
         case SDL_KEYUP:
             switch(event->key.keysym.sym) {
                 case SDLK_a:
-                    left_movement = 0;
+                    player.left_movement = 0;
                 break;
 
                 case SDLK_d:
-                    right_movement = 0;
+                    player.right_movement = 0;
                 break;
             }
         break;
@@ -52,24 +53,27 @@ static int x_max = 130;
 
 void move_player() {
     // left/right movement
-    if(left_movement) {
-        player_x_pos -= 5;
-        // move_game_objects(-5, 0);
+    if(player.left_movement) {
+        // camera_x -= 5;
+        // player_x_pos -= 5;
+        move_game_objects(-5, 0);
     }
-    if(right_movement) {
-        player_x_pos += 5;
-        // move_game_objects(5, 0);
+    if(player.right_movement) {
+        // camera_x += 5;
+        // player_x_pos += 5;
+        // decide whether to use camera_x or moving game objects technique
+        move_game_objects(5, 0);
     }
 
     // jumping
-    if(can_jump == 0) {
+    if(player.can_jump == 0) {
         x += 1;
         if(x == x_max) {
-            can_jump = 1;
+            player.can_jump = 1;
             x = 0;
         }
 
-        player_y_pos = (SCREEN_HEIGHT - player_height) - get_velocity(x, x_max);
+        player.player_y_pos = (SCREEN_HEIGHT - player.player_height) - get_velocity(x, x_max);
     }
 }
 // Uses quadratic function

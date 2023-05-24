@@ -5,11 +5,19 @@
 #include "variables.h"
 #include "game_object.h"
 
-int player_width, player_height, player_x_pos, player_y_pos;
-// Movement variables
-short int left_movement, right_movement, can_jump;
+typedef struct Player_s {
+    int player_width, player_height, player_x_pos, player_y_pos;
+    // Movement variables
+    short int left_movement, right_movement, can_jump;
+    // Gameplay related stats
+    int max_health, health;
+} Player;
+
+Player player;
 static int x, x_max;
 
+// Sets Player object and sets all default (start) variables
+void prepare_player();
 // Sets and prepares player gameobject for rendering
 int render_player();
 // Checks for any keydown/up movement and makes player do things like movement etc.

@@ -33,13 +33,11 @@ void render_game_objects() {
         SDL_RenderCopy(renderer, game_objects[i].texture, NULL, &dstrect);
         game_objects[i].is_rendered = 1;
     }
-
-    printf("%d %d\n", player_x_pos, player_y_pos);
 }
 
 void move_game_objects(int x, int y) {
     for(int i = 0; i < GAME_OBJECTS_TOTAL; i++) {
-        game_objects[i].x += x;
-        game_objects[i].y += y;
+        game_objects[i].x -= x;
+        game_objects[i].y -= y;
     }
 }
