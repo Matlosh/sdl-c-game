@@ -3,18 +3,21 @@
 #include <SDL_ttf.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include "code/general.h"
 #include "code/variables.h"
 #include "code/player.h"
 #include "code/game_object.h"
 #include "code/ui.h"
+#include "code/map.h"
 
 int main(int argc, char *argv[]) {
     if(init(&main_window, &renderer)) return 1;
     if(load_game_objects()) return 1;
+    if(load_map()) return 1;
     prepare_ui();
     prepare_player();
-    printf("%d\n", player.player_x_pos);
 
     SDL_Event event;
 
@@ -39,7 +42,7 @@ int main(int argc, char *argv[]) {
 
         // Clear screen
         SDL_RenderClear(renderer);
-        render_game_objects();
+        render_map();
         render_player();
         render_ui();
 

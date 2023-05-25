@@ -1,4 +1,4 @@
-OBJS = main.c code/variables.c code/general.c code/player.c code/game_object.c code/ui.c
+OBJS = main.c code/variables.c code/general.c code/player.c code/game_object.c code/ui.c code/map.c
 OBJ_NAME = main
 
 # Compiler
