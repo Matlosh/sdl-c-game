@@ -24,15 +24,15 @@ typedef struct Chunk_s {
 
 // Chunk_Element contains game object (from enum Game_Objects) and its priority
 // priority - the higher number is given the lower the chance that game object will be spawned (or lesser amount)
-//  of that game object will appear when rendering a chunk 
+// of that game object will appear when rendering a chunk 
 typedef struct Chunk_Element_s {
-    int priority;
+    int game_object_template, priority;
 } Chunk_Element;
 
 // Chunk_Elements contains what elements and how many of them can a chunk of a certain type contain
 // Note: REMEMBER TO FREE chunk_elements MEMORY after it is not needed anymore  
 typedef struct Chunk_Elements_s {
-    int chunk_type, max_elements;
+    int chunk_type, max_elements, object_elements_count;
     Chunk_Element *chunk_object_elements;
 } Chunk_Elements;
 
@@ -49,8 +49,12 @@ void prepare_map();
 int load_map();
 // Renders the current map onto the screen
 void render_map();
+// Checks if objects are overlapping; Returns 0 if no, else 1
+static int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2);
 // Generates chunk and returns it - REMEMBER TO FREE Chunk MEMORY after it is not needed anymore
 // Note: generated game objects of Chunk are automatically added to the "global" Game_Objects array
-Chunk *generate_chunk();
+// Note 2: start_x and start_y are the start x/y position of the chunk - where it begins, so
+// full chunk screen size equals start_x + SCREEN_WIDTH and start_y + SCREEN_HEIGHT
+Chunk *generate_chunk(int chunk_type, int start_x, int start_y);
 
 #endif

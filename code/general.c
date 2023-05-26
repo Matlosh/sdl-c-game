@@ -1,6 +1,8 @@
 #include "general.h"
 
 int init(SDL_Window **window, SDL_Renderer **renderer) {
+    srand(time(NULL));
+
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL could not initialize: %s\n", SDL_GetError());
         return 1;

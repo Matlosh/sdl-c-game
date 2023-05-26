@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <stdlib.h>
+#include <time.h>
 #include "variables.h"
 
 // Initializes the app - Returns 0 on success, otherwise 1

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <time.h>
 #include "code/general.h"
 #include "code/variables.h"
 #include "code/player.h"
@@ -16,8 +17,8 @@
 int main(int argc, char *argv[]) {
     if(init(&main_window, &renderer)) return 1;
     if(load_game_objects()) return 1;
-    if(load_map()) return 1;
     prepare_map();
+    if(load_map()) return 1;
     prepare_ui();
     prepare_player();
 

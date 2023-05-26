@@ -6,6 +6,7 @@ static void set_single_chunk_elements(int chunk_type, int max_elements, int diff
 
     chunk_elements[chunk_type].chunk_type = chunk_type;
     chunk_elements[chunk_type].max_elements = max_elements;
+    chunk_elements[chunk_type].object_elements_count = diff_game_objects_length;
     
     Chunk_Element *chunk_object_elements = malloc(sizeof(Chunk_Element) * diff_game_objects_length);
 
@@ -21,27 +22,36 @@ static void set_single_chunk_elements(int chunk_type, int max_elements, int diff
 
 void prepare_map() {
     chunk_element_arr[TEST_OBJECT].priority = 2;
+    chunk_element_arr[TEST_OBJECT].game_object_template = TEST_OBJECT;
     chunk_element_arr[GRASS_PLATFORM].priority = 1;
+    chunk_element_arr[GRASS_PLATFORM].game_object_template = GRASS_PLATFORM;
 
     set_single_chunk_elements(PARKOUR, 8, 2, TEST_OBJECT, GRASS_PLATFORM);
+    // generate_chunk(PARKOUR, 0, 0);
+
+    // Game_Object obj_1 = {.x = 50, .y = 50, .width = 51, .height = 51};
+    // Game_Object obj_2 = {.x = 100, .y = 100, .width = 100, .height = 100};
+    // printf("are overlapping: %d %d\n", are_objects_overlapping(&obj_1, &obj_2),
+    //     are_objects_overlapping(&obj_2, &obj_1));
 }
 
 int load_map() {
-    game_objects.length = 2;
-    game_objects.objects = realloc(game_objects.objects, sizeof(Game_Object) * game_objects.length);
+    // game_objects.length = 2;
+    // game_objects.objects = realloc(game_objects.objects, sizeof(Game_Object) * game_objects.length);
 
-    memcpy(&game_objects.objects[0], &game_objects_templates[TEST_OBJECT], sizeof(Game_Object));
-    game_objects.objects[0].x = 300;
+    // memcpy(&game_objects.objects[0], &game_objects_templates[TEST_OBJECT], sizeof(Game_Object));
+    // game_objects.objects[0].x = 300;
 
-    memcpy(&game_objects.objects[1], &game_objects_templates[GRASS_PLATFORM], sizeof(Game_Object));
-    SDL_Rect srcrect = {.w = 32, .h = 32, .x = 64, .y = 0};
-    game_objects.objects[1].srcrect = srcrect;
+    // memcpy(&game_objects.objects[1], &game_objects_templates[GRASS_PLATFORM], sizeof(Game_Object));
+    // SDL_Rect srcrect = {.w = 32, .h = 32, .x = 64, .y = 0};
+    // game_objects.objects[1].srcrect = srcrect;
+    generate_chunk(PARKOUR, 0, 0);
     return 0;
 }
 
 void render_map() {
     for(int i = 0; i < game_objects.length; i++) {
-        Game_Object *current_object = &game_objects.objects[i];
+        Game_Object *current_object = game_objects.objects[i];
         // Checks if element is off screen
         if(current_object->x > SCREEN_WIDTH ||
             current_object->x + current_object->width < 0 ||
@@ -58,8 +68,77 @@ void render_map() {
     }
 }
 
-Chunk *generate_chunk() {
+static int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2) {
+    if(object_1->x < object_2->x &&
+        object_1->x + object_1->width <= object_2->x) return 0;
+
+    if(object_1->x >= object_2->x + object_2->width) return 0;
+
+    if(object_1->y < object_2->y &&
+        object_1->y + object_1->height <= object_2->y) return 0;
+
+    if(object_1->y >= object_2->y + object_2->height) return 0;
+
+    return 1;
+}
+
+Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
     Chunk *chunk = malloc(sizeof(Chunk));
 
-    
+    Chunk_Elements *element = &chunk_elements[chunk_type];
+    int priorities_sum = 0;
+    int object_templates[element->object_elements_count];
+
+    for(int i = 0; i < element->object_elements_count; i++) {
+        Chunk_Element *object_element = &chunk_elements[chunk_type].chunk_object_elements[i];
+        priorities_sum += object_element->priority;
+        object_templates[i] = object_element->game_object_template;
+    }
+
+    // Ratio for how many blocks of some type should be generated on this chunk 
+    int priority_ratio = (int)((double)priorities_sum / element->object_elements_count);
+    Game_Object *generated_objects[element->max_elements];
+    int generated_objects_current = 0;
+
+    // NULLing generated_objects for further convenience
+    for(int i = 0; i < element->max_elements; i++) generated_objects[i] = NULL;
+
+    for(int i = 0; i < element->object_elements_count; i++) {
+        int object_template = object_templates[i];
+
+        for(int j = 0; j < priority_ratio * element->chunk_object_elements[object_template].priority; j++) {
+            Game_Object *object = malloc(sizeof(Game_Object));
+            memcpy(object, &game_objects_templates[object_template], sizeof(Game_Object));
+            // printf("%dx%d\n", object->sprites_info.sprite_width, object->sprites_info.sprite_height);
+
+            int is_generated = 0, x = 0, y = 0;
+            while(!is_generated) {
+                x = rand() % (SCREEN_WIDTH - object->width) + start_x;
+                y = rand() % (SCREEN_HEIGHT - object->height) + start_y;
+
+                object->x = x;
+                object->y = y;
+
+                is_generated = 1;
+                for(int l = 0; l < element->max_elements; l++) {
+                    if(generated_objects[l] == NULL) break;
+                    if(are_objects_overlapping(object, generated_objects[l])) {
+                        is_generated = 0;
+                        break;
+                    }
+                }
+            }
+
+            game_objects.length = game_objects.length + 1;
+            game_objects.objects = realloc(game_objects.objects, sizeof(Game_Object *) * game_objects.length);
+
+            game_objects.objects[game_objects.length - 1] = object;
+
+            // continue here with making maybe more reasonable generating positions
+
+            generated_objects[generated_objects_current] = object;
+            generated_objects_current++;
+
+        }
+    }
 }
