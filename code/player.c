@@ -1,9 +1,9 @@
 #include "player.h"
 
 void prepare_player() {
-    Player player_init = {.player_width = 100, .player_height = 100,
+    Player player_init = {.player_width = 50, .player_height = 50,
         .player_x_pos = SCREEN_WIDTH / 2 - (100 / 2),
-        .player_y_pos = SCREEN_HEIGHT - 100,
+        .player_y_pos = SCREEN_HEIGHT - 50,
         .left_movement = 0, .right_movement = 0, .can_jump = 1,
         .max_health = 100, .health = 47};
     player = player_init;
@@ -49,7 +49,7 @@ void process_player_movement(SDL_Event *event) {
 }
 
 static int x = 0;
-static int x_max = 130;
+static int x_max = 150;
 
 void move_player() {
     // left/right movement

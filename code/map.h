@@ -4,11 +4,53 @@
 #include <SDL.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "game_object.h"
 
+// Chunk is a SCREEN_WIDTH x SCREEN_HEIGHT place where some type of "room" is generated
+// Depending on the type of "room" some specific objects/items/etc. must be spawned within it
+
+enum Chunk_Type {
+    PARKOUR,
+    CHUNK_TYPE_TOTAL
+};
+
+typedef struct Chunk_s {
+    int chunk_type;
+    // pointers to Game Objects added to the general Game_Objects array
+    // game objects that were genereted within that chunk  
+    Game_Object **objects;
+} Chunk;
+
+// Chunk_Element contains game object (from enum Game_Objects) and its priority
+// priority - the higher number is given the lower the chance that game object will be spawned (or lesser amount)
+//  of that game object will appear when rendering a chunk 
+typedef struct Chunk_Element_s {
+    int priority;
+} Chunk_Element;
+
+// Chunk_Elements contains what elements and how many of them can a chunk of a certain type contain
+// Note: REMEMBER TO FREE chunk_elements MEMORY after it is not needed anymore  
+typedef struct Chunk_Elements_s {
+    int chunk_type, max_elements;
+    Chunk_Element *chunk_object_elements;
+} Chunk_Elements;
+
+Chunk_Element chunk_element_arr[GAME_OBJECTS_TOTAL];
+Chunk_Elements chunk_elements[CHUNK_TYPE_TOTAL];
+
+// Sets one position of "chunk_elements" array with given parameters
+// "diff_game_objects_length" is a number of different Game_Objects (enum) elements that will appear
+// after that argument
+static void set_single_chunk_elements(int chunk_type, int max_elements, int diff_game_objects_length, ...);
+// Prepares all chunk elements for further use
+void prepare_map();
 // Loads all needed map elements; Returns 0 if successful, else 1
 int load_map();
 // Renders the current map onto the screen
 void render_map();
+// Generates chunk and returns it - REMEMBER TO FREE Chunk MEMORY after it is not needed anymore
+// Note: generated game objects of Chunk are automatically added to the "global" Game_Objects array
+Chunk *generate_chunk();
 
 #endif

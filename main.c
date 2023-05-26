@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "code/general.h"
 #include "code/variables.h"
 #include "code/player.h"
@@ -16,8 +17,24 @@ int main(int argc, char *argv[]) {
     if(init(&main_window, &renderer)) return 1;
     if(load_game_objects()) return 1;
     if(load_map()) return 1;
+    prepare_map();
     prepare_ui();
     prepare_player();
+
+    // test
+    // int *array = calloc(4, sizeof(int));
+    // array[0] = 1;
+    // array[1] = 2;
+    // array[2] = 4;
+    // array[3] = 8;
+
+    // printf("%d %d %d %d\n", array[0], array[1], array[2], array[3]);
+
+    // memmove(&array[1], &array[2], sizeof(int) * 2);
+    // array = realloc(array, sizeof(int) * 3);
+
+    // printf("%d %d %d %d\n", array[0], array[1], array[2], array[3]);
+    //
 
     SDL_Event event;
 

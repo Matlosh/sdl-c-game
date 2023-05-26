@@ -28,6 +28,9 @@ typedef struct Game_Object_s {
     int width, height, x, y;
     // 0 -> is not rendered; 1 -> is rendered
     int is_rendered;
+    // srcrect corresponds to the rect that is going to be clipped from the texture
+    // f.e. this is useful when texture is a sprite
+    SDL_Rect srcrect;
 } Game_Object;
 
 // Struct to help getting control of the all Game Objects

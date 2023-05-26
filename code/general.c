@@ -37,6 +37,7 @@ void close(SDL_Window **window, SDL_Renderer **renderer) {
     SDL_DestroyWindow(*window);
 
     // Implement destroying all available textures (texts, game objects, etc.)
+    // Implement freeing memory of game objects and chunks
 
     IMG_Quit();
     SDL_Quit();
