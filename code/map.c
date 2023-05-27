@@ -82,6 +82,43 @@ static int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2)
     return 1;
 }
 
+static int check_generated_if_overlapping(Game_Object *current_object, Game_Object **generated_objects,
+    int max_elements) {
+    for(int l = 0; l < max_elements; l++) {
+        if(generated_objects[l] == NULL) return 0;
+        if(are_objects_overlapping(current_object, generated_objects[l])) return 1;
+    }
+
+    return 0;
+}
+
+static int generating_near_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object) {
+    for(int l = 0; l < generated_objects_count; l++) {
+        // Checking if object templates are of the same type (they share the same textures)
+        if(generated_objects[l]->texture == current_object->texture && rand() % 100 >= 50) {
+            current_object->x = generated_objects[l]->x + generated_objects[l]->width;
+            current_object->y = generated_objects[l]->y;
+            if(!check_generated_if_overlapping(current_object, generated_objects, generated_objects_count))
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
+static int generating_random_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object, int start_x, int start_y) {
+    current_object->x = rand() % (SCREEN_WIDTH - current_object->width) + start_x;
+    current_object->y = rand() % (SCREEN_HEIGHT - current_object->height) + start_y;
+    
+    // printf("%d\n", check_generated_if_overlapping(current_object, generated_objects, generated_objects_count));
+    if(!check_generated_if_overlapping(current_object, generated_objects, generated_objects_count))
+        return 0;
+
+    return 1;
+}
+
 Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
     Chunk *chunk = malloc(sizeof(Chunk));
 
@@ -96,7 +133,7 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
     }
 
     // Ratio for how many blocks of some type should be generated on this chunk 
-    int priority_ratio = (int)((double)priorities_sum / element->object_elements_count);
+    // int priority_ratio = (int)((double)priorities_sum / element->object_elements_count);
     Game_Object *generated_objects[element->max_elements];
     int generated_objects_current = 0;
 
@@ -106,27 +143,21 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
     for(int i = 0; i < element->object_elements_count; i++) {
         int object_template = object_templates[i];
 
-        for(int j = 0; j < priority_ratio * element->chunk_object_elements[object_template].priority; j++) {
+        int objects_count = (int)(element->max_elements / (double)priorities_sum
+            * element->chunk_object_elements[object_template].priority * (rand() / (double)RAND_MAX + 0.5));
+        if(objects_count > element->max_elements) objects_count = element->max_elements;
+
+        for(int j = 0; j < objects_count; j++) {
             Game_Object *object = malloc(sizeof(Game_Object));
             memcpy(object, &game_objects_templates[object_template], sizeof(Game_Object));
             // printf("%dx%d\n", object->sprites_info.sprite_width, object->sprites_info.sprite_height);
 
-            int is_generated = 0, x = 0, y = 0;
-            while(!is_generated) {
-                x = rand() % (SCREEN_WIDTH - object->width) + start_x;
-                y = rand() % (SCREEN_HEIGHT - object->height) + start_y;
-
-                object->x = x;
-                object->y = y;
-
-                is_generated = 1;
-                for(int l = 0; l < element->max_elements; l++) {
-                    if(generated_objects[l] == NULL) break;
-                    if(are_objects_overlapping(object, generated_objects[l])) {
-                        is_generated = 0;
-                        break;
-                    }
-                }
+            int counter = 0;
+            while(counter < 10) {
+                if(!generating_near_method(generated_objects_current, generated_objects, object)) break;
+                if(!generating_random_method(generated_objects_current, generated_objects, object, start_x, start_y)) break;
+                // To prevent from possible endless loop under certain conditions try to generate 10 times
+                counter++;
             }
 
             game_objects.length = game_objects.length + 1;
@@ -138,7 +169,6 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
 
             generated_objects[generated_objects_current] = object;
             generated_objects_current++;
-
         }
     }
 }

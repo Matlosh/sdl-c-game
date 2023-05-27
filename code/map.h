@@ -51,6 +51,19 @@ int load_map();
 void render_map();
 // Checks if objects are overlapping; Returns 0 if no, else 1
 static int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2);
+// Simply uses are_objects_overlapping function to check if current_object is overlapping
+// with any of the generated_objects
+// Returns: 0 if object isn't overlapping with any generated, else 1
+static int check_generated_if_overlapping(Game_Object *current_object, Game_Object **generated_objects,
+    int max_elements);
+// Generating possibility no.1: Spawning near block of the same type | 50% chance
+// Returns: 0 if object can be generated, else 1
+static int generating_near_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object);
+// Generating possibility 2: On random x, y
+// Returns: 0 if object can be generated, else 1
+static int generating_random_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object, int start_x, int start_y);
 // Generates chunk and returns it - REMEMBER TO FREE Chunk MEMORY after it is not needed anymore
 // Note: generated game objects of Chunk are automatically added to the "global" Game_Objects array
 // Note 2: start_x and start_y are the start x/y position of the chunk - where it begins, so
