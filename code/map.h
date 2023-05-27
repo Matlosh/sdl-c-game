@@ -50,7 +50,9 @@ int load_map();
 // Renders the current map onto the screen
 void render_map();
 // Checks if objects are overlapping; Returns 0 if no, else 1
-static int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2);
+int are_objects_overlapping(Game_Object *object_1, Game_Object *object_2);
+// Checks if objects are in each others area (check Chunk Notes); Returns 0 if no, else 1
+static int are_objects_in_area(Game_Object *object_1, Game_Object *object_2);
 // Simply uses are_objects_overlapping function to check if current_object is overlapping
 // with any of the generated_objects
 // Returns: 0 if object isn't overlapping with any generated, else 1
@@ -59,7 +61,7 @@ static int check_generated_if_overlapping(Game_Object *current_object, Game_Obje
 // Generating possibility no.1: Spawning near block of the same type | 50% chance
 // Returns: 0 if object can be generated, else 1
 static int generating_near_method(int generated_objects_count, Game_Object **generated_objects,
-    Game_Object *current_object);
+    Game_Object *current_object, int start_x, int start_y);
 // Generating possibility 2: On random x, y
 // Returns: 0 if object can be generated, else 1
 static int generating_random_method(int generated_objects_count, Game_Object **generated_objects,
@@ -69,5 +71,13 @@ static int generating_random_method(int generated_objects_count, Game_Object **g
 // Note 2: start_x and start_y are the start x/y position of the chunk - where it begins, so
 // full chunk screen size equals start_x + SCREEN_WIDTH and start_y + SCREEN_HEIGHT
 Chunk *generate_chunk(int chunk_type, int start_x, int start_y);
+
+// Chunk Notes:
+// - Chunk consists of SCREEN_WIDTH / 64 x SCREEN_HEIGHT / 64 areas
+// - In each area there can be generated one block/item/etc.
+// - Near each generated block there can't be any block of other type:
+// AAA  where A - area unavailable to other blocks
+// ABA        B - generated block
+// AAA
 
 #endif

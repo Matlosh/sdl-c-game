@@ -4,9 +4,10 @@
 #include <SDL.h>
 #include "variables.h"
 #include "game_object.h"
+#include "map.h"
 
 typedef struct Player_s {
-    int player_width, player_height, player_x_pos, player_y_pos;
+    Game_Object player_rect;
     // Movement variables
     short int left_movement, right_movement, can_jump;
     // Gameplay related stats

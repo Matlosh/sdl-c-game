@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <stdlib.h>
 #include "general.h"
-#include "player.h"
 
 enum Game_Object_Type {
     BLOCK,

@@ -1,18 +1,21 @@
 #include "player.h"
 
 void prepare_player() {
-    Player player_init = {.player_width = 64, .player_height = 64,
-        .player_x_pos = SCREEN_WIDTH / 2 - (100 / 2),
-        .player_y_pos = SCREEN_HEIGHT - 64,
-        .left_movement = 0, .right_movement = 0, .can_jump = 1,
-        .max_health = 100, .health = 47};
+    Game_Object player_rect = {.width = 64, .height = 64, .x = SCREEN_WIDTH / 2 - 64,
+        .y = SCREEN_HEIGHT - 64};
+
+    Player player_init = { .left_movement = 0, .right_movement = 0, .can_jump = 1,
+        .max_health = 100, .health = 47 };
+    player_init.player_rect = player_rect;
+
     player = player_init;
 }
 
 int render_player() {
-    SDL_Rect fillRect = { player.player_x_pos, player.player_y_pos, player.player_width, player.player_height };
+    SDL_Rect fill_rect = { .w = player.player_rect.width, .h = player.player_rect.height,
+        .x = player.player_rect.x, .y = player.player_rect.y };
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderFillRect(renderer, &fillRect);
+    SDL_RenderFillRect(renderer, &fill_rect);
 }
 
 void process_player_movement(SDL_Event *event) {
@@ -67,13 +70,20 @@ void move_player() {
 
     // jumping
     if(player.can_jump == 0) {
+        for(int i = 0; i < game_objects.length; i++) {
+            Game_Object *object = game_objects.objects[i];
+            // if(object->type == BLOCK && are_objects_overlapping(&player.player_rect, object)) {
+                
+            // }
+        }
+
         x += 1;
         if(x == x_max) {
             player.can_jump = 1;
             x = 0;
         }
 
-        player.player_y_pos = (SCREEN_HEIGHT - player.player_height) - get_velocity(x, x_max);
+        player.player_rect.y = (SCREEN_HEIGHT - player.player_rect.height) - get_velocity(x, x_max);
     }
 }
 // Uses quadratic function

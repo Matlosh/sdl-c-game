@@ -25,7 +25,7 @@ static void load_game_object_template(int template_name, int width, int height, 
 }
 
 int load_game_objects() {
-    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BLOCK, 100, 100, 1);
+    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BUTTON, 100, 100, 1);
     load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 0, BLOCK, 128, 32, 4);
 
     game_objects.length = 0;
