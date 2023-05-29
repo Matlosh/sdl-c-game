@@ -1,11 +1,12 @@
 #include "player.h"
+#include <math.h>
 
 void prepare_player() {
     Game_Object player_rect = {.width = 64, .height = 64, .x = SCREEN_WIDTH / 2 - 64,
         .y = SCREEN_HEIGHT - 64};
 
     Player player_init = { .left_movement = 0, .right_movement = 0, .can_jump = 1,
-        .max_health = 100, .health = 47 };
+        .max_health = 100, .health = 47, .stand_y = SCREEN_HEIGHT - player_rect.height };
     player_init.player_rect = player_rect;
 
     player = player_init;
@@ -55,26 +56,63 @@ static int x = 0;
 static int x_max = 150;
 
 void move_player() {
+    // printf("%d\n", player.player_rect.y);
+    int can_fall = 1; // continue here with making fall movement
+    for(int i = 0; i < game_objects.length; i++) {
+        Game_Object *object = game_objects.objects[i];
+
+        if(object->type == BLOCK && (are_objects_overlapping(&player.player_rect, object) ||
+            get_collision_direction(&player.player_rect, object))) {
+            printf("are overlapping %d, is colliding %d\n", are_objects_overlapping(&player.player_rect, object), get_collision_direction(&player.player_rect, object));
+            can_fall = 0;
+        }
+
+        // printf("%d\n", get_collision_direction(&player.player_rect, object));
+        if(object->type == BLOCK && are_objects_overlapping(&player.player_rect, object)) {
+            switch(get_collision_direction(&player.player_rect, object)) {
+                case COLLISION_TOP:
+                    player.player_rect.y = object->y - player.player_rect.height;
+                    player.stand_y = object->y - player.player_rect.height;
+                    x = 0;
+                    player.can_jump = 1;
+                break;
+
+                case COLLISION_RIGHT:
+
+                break;
+
+                case COLLISION_BOTTOM:
+
+                break;
+
+                case COLLISION_LEFT:
+
+                break;
+
+                default: break;
+            }
+        }
+    }
+
     // left/right movement
     if(player.left_movement) {
-        // camera_x -= 5;
-        // player_x_pos -= 5;
         move_game_objects(-5, 0);
     }
+
     if(player.right_movement) {
-        // camera_x += 5;
-        // player_x_pos += 5;
-        // decide whether to use camera_x or moving game objects technique
         move_game_objects(5, 0);
     }
 
+    if(player.can_jump && can_fall && player.player_rect.y + player.player_rect.height < SCREEN_HEIGHT) {
+        printf("can fall\n");
+        player.player_rect.y += 6;
+        player.stand_y += 6;
+    }
     // jumping
     if(player.can_jump == 0) {
-        for(int i = 0; i < game_objects.length; i++) {
-            Game_Object *object = game_objects.objects[i];
-            // if(object->type == BLOCK && are_objects_overlapping(&player.player_rect, object)) {
-                
-            // }
+        if(player.player_rect.y >= SCREEN_HEIGHT) {
+            player.can_jump = 1;
+            x = 0;
         }
 
         x += 1;
@@ -83,10 +121,33 @@ void move_player() {
             x = 0;
         }
 
-        player.player_rect.y = (SCREEN_HEIGHT - player.player_rect.height) - get_velocity(x, x_max);
+        player.player_rect.y = player.stand_y - get_velocity(x, x_max);
     }
+
 }
 // Uses quadratic function
 static int get_velocity(int x, int x_max) {
     return (int) (-((double)1 / 25) * x * (x - x_max));
+}
+
+static int get_collision_direction(Game_Object *object_1, Game_Object *object_2) {
+    if(object_1->y + object_1->height <= object_2->y + 4 && object_1->y + object_1->height >= object_2->y &&
+        abs(object_2->x - object_1->x) < 64)
+        return COLLISION_TOP;
+
+    if(object_1->x >= object_2->x + object_2->width - 4 && object_1->x <= object_2->x + object_2->width + 4 &&
+        (object_2->y - object_1->y < object_1->height &&
+        object_1->y + object_1->height - object_2->y + object_2->height < object_1->height ))
+        return COLLISION_RIGHT;
+
+    if(object_1->y >= object_2->y + object_2->height - 4 && object_1->y <= object_2->y + object_2->height + 4 &&
+        abs(object_2->x - object_1->x) < 64)
+        return COLLISION_BOTTOM;
+
+    if(object_1->x + object_1->width <= object_2->x + 4 && object_1->x + object_1->width >= object_2->x - 4 &&
+        (object_2->y - object_1->y < object_1->height &&
+        object_1->y + object_1->height - object_2->y + object_2->height < object_1->height ))
+        return COLLISION_LEFT; 
+
+    return NO_COLLISION;
 }
