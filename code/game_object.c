@@ -3,7 +3,8 @@
 // All game objects
 static const char *game_objects_paths[GAME_OBJECTS_TOTAL] = {
     "resources/test_object.png",
-    "resources/platform_1_sprites.png"
+    "resources/platform_1_sprites.png",
+    "resources/spike.png"
 };
 
 static void load_game_object_template(int template_name, int width, int height, int x,
@@ -27,6 +28,7 @@ static void load_game_object_template(int template_name, int width, int height, 
 int load_game_objects() {
     load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BUTTON, 100, 100, 1);
     load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 0, BLOCK, 128, 32, 4);
+    load_game_object_template(SPIKE, 64, 64, 0, 0, 0, TRAP, 32, 32, 1);
 
     game_objects.length = 0;
     game_objects.objects = calloc(0, sizeof(Game_Object));

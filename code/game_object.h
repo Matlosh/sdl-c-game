@@ -9,6 +9,7 @@ enum Game_Object_Type {
     BLOCK,
     BUTTON,
     EFFECT,
+    TRAP,
     GAME_OBJECT_TYPE_TOTAL
 };
 
@@ -16,6 +17,7 @@ enum Game_Object_Type {
 enum Game_Objects {
     TEST_OBJECT,
     GRASS_PLATFORM,
+    SPIKE,
     GAME_OBJECTS_TOTAL
 };
 

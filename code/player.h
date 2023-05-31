@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <SDL.h>
+#include <math.h>
 #include "variables.h"
 #include "game_object.h"
 #include "map.h"

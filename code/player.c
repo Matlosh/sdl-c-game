@@ -1,5 +1,4 @@
 #include "player.h"
-#include <math.h>
 
 void prepare_player() {
     Game_Object player_rect = {.width = 64, .height = 64, .x = SCREEN_WIDTH / 2 - 64,
@@ -61,11 +60,8 @@ void move_player() {
     for(int i = 0; i < game_objects.length; i++) {
         Game_Object *object = game_objects.objects[i];
 
-        if(object->type == BLOCK && (are_objects_overlapping(&player.player_rect, object) ||
-            get_collision_direction(&player.player_rect, object))) {
-            printf("are overlapping %d, is colliding %d\n", are_objects_overlapping(&player.player_rect, object), get_collision_direction(&player.player_rect, object));
+        if(object->type == BLOCK && (get_collision_direction(&player.player_rect, object) == 1))
             can_fall = 0;
-        }
 
         // printf("%d\n", get_collision_direction(&player.player_rect, object));
         if(object->type == BLOCK && are_objects_overlapping(&player.player_rect, object)) {
@@ -77,17 +73,11 @@ void move_player() {
                     player.can_jump = 1;
                 break;
 
-                case COLLISION_RIGHT:
+                case COLLISION_RIGHT: break;
 
-                break;
+                case COLLISION_BOTTOM: break;
 
-                case COLLISION_BOTTOM:
-
-                break;
-
-                case COLLISION_LEFT:
-
-                break;
+                case COLLISION_LEFT: break;
 
                 default: break;
             }
@@ -97,17 +87,19 @@ void move_player() {
     // left/right movement
     if(player.left_movement) {
         move_game_objects(-5, 0);
+        camera_x += -5;
     }
 
     if(player.right_movement) {
         move_game_objects(5, 0);
+        camera_x += 5;
     }
 
     if(player.can_jump && can_fall && player.player_rect.y + player.player_rect.height < SCREEN_HEIGHT) {
-        printf("can fall\n");
         player.player_rect.y += 6;
         player.stand_y += 6;
     }
+
     // jumping
     if(player.can_jump == 0) {
         if(player.player_rect.y >= SCREEN_HEIGHT) {

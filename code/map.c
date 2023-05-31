@@ -21,20 +21,73 @@ static void set_single_chunk_elements(int chunk_type, int max_elements, int diff
 }
 
 void prepare_map() {
-    chunk_element_arr[TEST_OBJECT].priority = 1;
+    chunk_element_arr[TEST_OBJECT].priority = 8;
     chunk_element_arr[TEST_OBJECT].game_object_template = TEST_OBJECT;
-    chunk_element_arr[GRASS_PLATFORM].priority = 2;
+    chunk_element_arr[GRASS_PLATFORM].priority = 9;
     chunk_element_arr[GRASS_PLATFORM].game_object_template = GRASS_PLATFORM;
+    chunk_element_arr[SPIKE].game_object_template = SPIKE;
+    chunk_element_arr[SPIKE].priority = 1;
 
-    set_single_chunk_elements(PARKOUR, 16, 2, TEST_OBJECT, GRASS_PLATFORM);
+    for(int i = 0; i < CHUNK_TYPE_TOTAL; i++) chunk_elements[i].chunk_object_elements = NULL;
+
+    set_single_chunk_elements(PARKOUR, 16, 3, GRASS_PLATFORM, TEST_OBJECT, SPIKE);
 }
 
 int load_map() {
-    generate_chunk(PARKOUR, 0, 0);
+    generated_chunks.generated_chunks_count = 1;
+    generated_chunks.generated_chunks = malloc(sizeof(Chunk *) * generated_chunks.generated_chunks_count);
+
+    Chunk *chunk = generate_chunk(PARKOUR, 0, 0);
+    generated_chunks.generated_chunks[0] = chunk;
+
+    // Chunk *chunk_2 = generate_chunk(PARKOUR, SCREEN_WIDTH, 0);
+    // generated_chunks.generated_chunks[1] = chunk_2;
+    
+    // Chunk *chunk_3 = generate_chunk(PARKOUR, SCREEN_WIDTH * 2, 0);
+    // generated_chunks.generated_chunks[2] = chunk_3;
+
+    current_chunk = chunk;
     return 0;
 }
 
 void render_map() {
+    enum _generation_side {
+        LEFT,
+        RIGHT
+    };
+
+    int generation_position = 0, generation_side = 0;
+    // left
+    if(camera_x < current_chunk->start_x) {
+        generation_position = current_chunk->start_x - SCREEN_WIDTH;
+        generation_side = LEFT;
+    }
+
+    // right
+    if(camera_x + SCREEN_WIDTH > current_chunk->start_x + SCREEN_WIDTH) {
+        generation_position = current_chunk->start_x + SCREEN_WIDTH;
+        generation_side = RIGHT;
+    }
+
+    // To be repaired later
+    if(generation_position != 0) {
+        if(generation_side == LEFT && get_chunk(current_chunk->start_x - 1, 0) == NULL ||
+            generation_side == RIGHT && get_chunk(current_chunk->start_x + SCREEN_WIDTH + 1, 0) == NULL) {
+            Chunk *chunk = generate_chunk(PARKOUR, generation_position, 0);
+
+            generated_chunks.generated_chunks_count++;
+            generated_chunks.generated_chunks = realloc(generated_chunks.generated_chunks,
+                sizeof(Chunk *) * generated_chunks.generated_chunks_count);
+            generated_chunks.generated_chunks[generated_chunks.generated_chunks_count - 1] = chunk;
+        }
+    }
+
+    if(get_chunk(camera_x - SCREEN_WIDTH / 2, 0) != NULL)
+        current_chunk = get_chunk(camera_x - SCREEN_WIDTH / 2, 0);
+
+    if(get_chunk(camera_x + SCREEN_WIDTH / 2, 0) != NULL)
+        current_chunk = get_chunk(camera_x + SCREEN_WIDTH / 2, 0);
+
     for(int i = 0; i < game_objects.length; i++) {
         Game_Object *current_object = game_objects.objects[i];
         // Checks if element is off screen
@@ -85,6 +138,25 @@ static int check_generated_if_overlapping(Game_Object *current_object, Game_Obje
     return 0;
 }
 
+static int generating_on_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object, int start_x, int start_y) {
+    if(current_object->type != TRAP) return 1;
+
+    for(int l = 0; l < generated_objects_count; l++) {
+        if(generated_objects[l]->type == BLOCK) {
+            current_object->x = generated_objects[l]->x;
+            current_object->y = generated_objects[l]->y - generated_objects[l]->height;
+
+            if(current_object->y < 0) return 1;
+
+            if(!check_generated_if_overlapping(current_object, generated_objects, generated_objects_count))
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
 static int generating_near_method(int generated_objects_count, Game_Object **generated_objects,
     Game_Object *current_object, int start_x, int start_y) {
     for(int l = 0; l < generated_objects_count; l++) {
@@ -93,7 +165,7 @@ static int generating_near_method(int generated_objects_count, Game_Object **gen
             current_object->x = generated_objects[l]->x + generated_objects[l]->width;
             current_object->y = generated_objects[l]->y;
 
-            if(current_object->x + current_object->width > start_x + SCREEN_WIDTH) return 1;
+            if(current_object->x + current_object->width > start_x + SCREEN_WIDTH) continue;
 
             if(!check_generated_if_overlapping(current_object, generated_objects, generated_objects_count))
                 return 0;
@@ -108,7 +180,9 @@ static int generating_random_method(int generated_objects_count, Game_Object **g
     int x_pos = rand() % (SCREEN_WIDTH / 64);
     int y_pos = rand() % (SCREEN_HEIGHT / 64);
 
-    current_object->x = x_pos * 64 + start_x;
+    // Beecause game objects are moved (instead of the player) generated position has to be
+    // subtracted from the camera_x
+    current_object->x = x_pos * 64 + start_x - camera_x;
     current_object->y = y_pos * 64 + start_y;
 
     if(!check_generated_if_overlapping(current_object, generated_objects, generated_objects_count)) {
@@ -125,6 +199,9 @@ static int generating_random_method(int generated_objects_count, Game_Object **g
 Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
     Chunk *chunk = malloc(sizeof(Chunk));
 
+    chunk->start_x = start_x;
+    chunk->start_y = start_y;
+
     Chunk_Elements *element = &chunk_elements[chunk_type];
     int priorities_sum = 0;
     int object_templates[element->object_elements_count];
@@ -137,7 +214,8 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
 
     // Ratio for how many blocks of some type should be generated on this chunk 
     // int priority_ratio = (int)((double)priorities_sum / element->object_elements_count);
-    Game_Object *generated_objects[element->max_elements];
+    Game_Object **generated_objects = calloc(element->max_elements, sizeof(Game_Object *) * element->max_elements);
+    // Game_Object *generated_objects[element->max_elements];
     int generated_objects_current = 0;
 
     // NULLing generated_objects for further convenience
@@ -148,7 +226,9 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
 
         int objects_count = (int)(element->max_elements / (double)priorities_sum
             * element->chunk_object_elements[object_template].priority * (rand() / (double)RAND_MAX + 0.5));
-        if(objects_count > element->max_elements) objects_count = element->max_elements;
+
+        if(generated_objects_current + objects_count > element->max_elements)
+            objects_count = (generated_objects_current + objects_count) - element->max_elements;
 
         for(int j = 0; j < objects_count; j++) {
             Game_Object *object = malloc(sizeof(Game_Object));
@@ -156,12 +236,18 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
 
             int counter = 0;
             while(counter < 10) {
+                // what if trap isn't generated here?
+                if(!generating_on_method(generated_objects_current, generated_objects, object,
+                    start_x, start_y)) break;
                 if(!generating_near_method(generated_objects_current, generated_objects, object,
                     start_x, start_y)) break;
-                if(!generating_random_method(generated_objects_current, generated_objects, object, start_x, start_y)) break;
+                if(!generating_random_method(generated_objects_current, generated_objects, object,
+                    start_x, start_y)) break;
                 // To prevent from possible endless loop under certain conditions try to generate 10 times
                 counter++;
             }
+
+            if(counter == 10) continue;
 
             game_objects.length = game_objects.length + 1;
             game_objects.objects = realloc(game_objects.objects, sizeof(Game_Object *) * game_objects.length);
@@ -172,4 +258,19 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
             generated_objects_current++;
         }
     }
+
+    chunk->objects_in_chunk = generated_objects_current;
+    chunk->objects = generated_objects;
+
+    return chunk;
+}
+
+static Chunk *get_chunk(int x, int y) {
+    for(int i = 0; i < generated_chunks.generated_chunks_count; i++) {
+        if(x >= generated_chunks.generated_chunks[i]->start_x &&
+            x <= generated_chunks.generated_chunks[i]->start_x + SCREEN_WIDTH)
+            return generated_chunks.generated_chunks[i];
+    }
+
+    return NULL;
 }

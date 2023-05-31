@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include "variables.h"
+// #include "game_object.h"
+// #include "map.h"
 
 // Initializes the app - Returns 0 on success, otherwise 1
 int init(SDL_Window **window, SDL_Renderer **renderer);

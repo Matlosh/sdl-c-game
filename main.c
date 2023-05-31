@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <math.h>
 #include "code/general.h"
 #include "code/variables.h"
 #include "code/player.h"

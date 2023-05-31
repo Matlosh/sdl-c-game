@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "game_object.h"
+#include "player.h"
 
 // Chunk is a SCREEN_WIDTH x SCREEN_HEIGHT place where some type of "room" is generated
 // Depending on the type of "room" some specific objects/items/etc. must be spawned within it
@@ -16,11 +17,17 @@ enum Chunk_Type {
 };
 
 typedef struct Chunk_s {
-    int chunk_type;
+    int chunk_type, start_x, start_y, objects_in_chunk;
     // pointers to Game Objects added to the general Game_Objects array
     // game objects that were genereted within that chunk  
     Game_Object **objects;
 } Chunk;
+
+typedef struct Chunk_Manager_s {
+    int generated_chunks_count;
+    // REMEMBER TO FREE generated_chunks MEMORY at the end of the game
+    Chunk **generated_chunks;
+} Chunk_Manager;
 
 // Chunk_Element contains game object (from enum Game_Objects) and its priority
 // priority - the higher number is given the lower the chance that game object will be spawned (or lesser amount)
@@ -38,6 +45,8 @@ typedef struct Chunk_Elements_s {
 
 Chunk_Element chunk_element_arr[GAME_OBJECTS_TOTAL];
 Chunk_Elements chunk_elements[CHUNK_TYPE_TOTAL];
+Chunk_Manager generated_chunks;
+static Chunk *current_chunk;
 
 // Sets one position of "chunk_elements" array with given parameters
 // "diff_game_objects_length" is a number of different Game_Objects (enum) elements that will appear
@@ -58,11 +67,15 @@ static int are_objects_in_area(Game_Object *object_1, Game_Object *object_2);
 // Returns: 0 if object isn't overlapping with any generated, else 1
 static int check_generated_if_overlapping(Game_Object *current_object, Game_Object **generated_objects,
     int max_elements);
-// Generating possibility no.1: Spawning near block of the same type | 50% chance
+// Generating possiibility no.1: On game object of BLOCK type - only for TRAP and similar types | 5% chance
+// Returns: 0 if object can be generated, else 1
+static int generating_on_method(int generated_objects_count, Game_Object **generated_objects,
+    Game_Object *current_object, int start_x, int start_y);
+// Generating possibility no.2: Spawning near block of the same type | 50% chance
 // Returns: 0 if object can be generated, else 1
 static int generating_near_method(int generated_objects_count, Game_Object **generated_objects,
     Game_Object *current_object, int start_x, int start_y);
-// Generating possibility 2: On random x, y
+// Generating possibility no.3: On random x, y
 // Returns: 0 if object can be generated, else 1
 static int generating_random_method(int generated_objects_count, Game_Object **generated_objects,
     Game_Object *current_object, int start_x, int start_y);
@@ -71,6 +84,9 @@ static int generating_random_method(int generated_objects_count, Game_Object **g
 // Note 2: start_x and start_y are the start x/y position of the chunk - where it begins, so
 // full chunk screen size equals start_x + SCREEN_WIDTH and start_y + SCREEN_HEIGHT
 Chunk *generate_chunk(int chunk_type, int start_x, int start_y);
+// Get chunk at x and y position
+// Returns: pointer to chunk if chunk was found, else NULL
+static Chunk *get_chunk(int x, int y);
 
 // Chunk Notes:
 // - Chunk consists of SCREEN_WIDTH / 64 x SCREEN_HEIGHT / 64 areas
