@@ -8,7 +8,7 @@ void prepare_player() {
     player_rect->y = SCREEN_HEIGHT - 64;
 
     Player player_init = { .left_movement = 0, .right_movement = 0, .can_jump = 1,
-        .max_health = 100, .health = 47, .stand_y = SCREEN_HEIGHT - player_rect->height };
+        .max_health = 10, .health = 4, .stand_y = SCREEN_HEIGHT - player_rect->height };
     player_init.player_rect = player_rect;
 
     player = player_init;
@@ -58,15 +58,13 @@ static int x = 0;
 static int x_max = 150;
 
 void move_player() {
-    // printf("%d\n", player.player_rect.y);
-    int can_fall = 1; // continue here with making fall movement
+    int can_fall = 1;
     for(int i = 0; i < game_objects.length; i++) {
         Game_Object *object = game_objects.objects[i];
 
         if(object->type == BLOCK && (get_collision_direction(player.player_rect, object) == 1))
             can_fall = 0;
 
-        // printf("%d\n", get_collision_direction(&player.player_rect, object));
         if(object->type == BLOCK && are_objects_overlapping(player.player_rect, object)) {
             switch(get_collision_direction(player.player_rect, object)) {
                 case COLLISION_TOP:
@@ -84,6 +82,13 @@ void move_player() {
 
                 default: break;
             }
+        }
+
+        // Using effects on collision/overlapping/etc.
+        if(are_objects_overlapping(player.player_rect, object) && !object->did_use_effect) {
+            for(int j = 0; j < object->interaction_effects.effects_count; j++)
+                object->interaction_effects.custom_effects[j](object, &player);
+            object->did_use_effect = 1;
         }
     }
 

@@ -38,7 +38,7 @@ typedef struct Game_Object_Effects_s {
     int effects_count;
     // Custom effect function that is exectued on player's interaction with that block/etc.
     // Note: REMEMBER TO FREE its MEMORY after the object is not needed anymore
-    void (**custom_effects)(Game_Object, Player);
+    void (**custom_effects)(Game_Object *, Player *);
 } Game_Object_Effects;
 
 typedef struct Game_Object_s {
@@ -47,8 +47,7 @@ typedef struct Game_Object_s {
     // Number of sprites available in the texture (f.e. if sprite is 128x32
     // and the sprite width height is 32x32 then the texture has 4 sprites
     short int texture_sprites_count;
-    // x and y are the coordinates where the game object is/should be
-    // currently rendered 
+    // x and y are the coordinates where the game object is/should be currently rendered 
     int width, height, x, y;
     // 0 -> is not rendered; 1 -> is rendered
     int is_rendered;
@@ -57,6 +56,8 @@ typedef struct Game_Object_s {
     SDL_Rect srcrect;
     Sprites_Info sprites_info;
     Game_Object_Effects interaction_effects;
+    // 0 - if effect(s) hasn't been used yet, else 1
+    short int did_use_effect;
 } Game_Object;
 
 // Struct to help getting control of the all Game Objects
@@ -83,6 +84,7 @@ static void load_game_object_template(int template_name, int width, int height, 
 int load_game_objects();
 // Moves all game objects in the x or y position
 void move_game_objects(int x, int y);
-void test(Game_Object a, Player p);
+// All player-object interaction effects 
+void lose_hp(Game_Object *object, Player *player);
 
 #endif

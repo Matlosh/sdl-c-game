@@ -1,5 +1,4 @@
 #include "game_object.h"
-#include "player.h"
 
 // All game objects
 static const char *game_objects_paths[GAME_OBJECTS_TOTAL] = {
@@ -39,11 +38,9 @@ static void load_game_object_template(int template_name, int width, int height, 
 }
 
 int load_game_objects() {
-    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BUTTON, 100, 100, 1, 1, &test);
-    load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 0, BLOCK, 128, 32, 4, 0);
-    load_game_object_template(SPIKE, 64, 64, 0, 0, 0, TRAP, 32, 32, 1, 0);
-
-    // game_objects_templates[TEST_OBJECT].interaction_effects.custom_effects[0]();
+    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 1, BUTTON, 100, 100, 1, 1, &lose_hp);
+    load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 1, BLOCK, 128, 32, 4, 0);
+    load_game_object_template(SPIKE, 64, 64, 0, 0, 1, TRAP, 32, 32, 1, 0);
 
     game_objects.length = 0;
     game_objects.objects = calloc(0, sizeof(Game_Object));
@@ -57,6 +54,8 @@ void move_game_objects(int x, int y) {
     }
 }
 
-void test(Game_Object a, Player p) {
-    printf("a test function!!!11!!\n");
+void lose_hp(Game_Object *object, Player *player) {
+    player->health--;
+    object->is_rendered = 0;
+    printf("lose_hp(...)\n");
 }
