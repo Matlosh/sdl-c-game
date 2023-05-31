@@ -1,6 +1,4 @@
 #include "general.h"
-// #include "game_object.h"
-// #include "map.h"
 
 int init(SDL_Window **window, SDL_Renderer **renderer) {
     srand(time(NULL));
@@ -43,11 +41,18 @@ void close(SDL_Window **window, SDL_Renderer **renderer) {
     // Implement destroying all available textures (texts, game objects, etc.)
     // Implement freeing memory of game objects and chunks
 
-    // for(int i = 0; i < GAME_OBJECTS_TOTAL; i++) {
-    //     if(chunk_elements[i].chunk_object_elements != NULL)
-    //         free(chunk_elements[i].chunk_object_elements);
-    //     printf("i: %d\n", i);
-    // }
+    // Information about chunk types
+    for(int i = 0; i < GAME_OBJECTS_TOTAL; i++)
+        free(chunk_elements[i].chunk_object_elements);
+
+    // Generated chunks
+    for(int i = 0; i < generated_chunks.generated_chunks_count; i++) {
+        for(int j = 0; j < generated_chunks.generated_chunks[i]->objects_in_chunk; j++)
+            free(generated_chunks.generated_chunks[i]->objects[j]);
+        free(generated_chunks.generated_chunks[i]->objects);
+        free(generated_chunks.generated_chunks[i]);
+    }
+    free(generated_chunks.generated_chunks);
 
     IMG_Quit();
     SDL_Quit();

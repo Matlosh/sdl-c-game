@@ -3,7 +3,6 @@
 
 #include <SDL.h>
 #include <stdlib.h>
-#include "general.h"
 
 enum Game_Object_Type {
     BLOCK,

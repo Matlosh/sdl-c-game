@@ -17,7 +17,7 @@ static void load_game_object_template(int template_name, int width, int height, 
     game_objects_templates[template_name].is_rendered = is_rendered;
     game_objects_templates[template_name].type = type;
     // srcrect should/can be specifically set when making a copy of the object to use in f.e. map
-    SDL_Rect srcrect = {.w = width, .h = height, .x = 0, .y = 0};
+    SDL_Rect srcrect = {.w = sprite_width / sprites_count, .h = sprite_height, .x = 0, .y = 0};
     game_objects_templates[template_name].srcrect = srcrect;
 
     Sprites_Info sprites_info = { .sprite_width = sprite_width, .sprite_height = sprite_height,

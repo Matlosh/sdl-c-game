@@ -37,13 +37,13 @@ typedef struct Chunk_Element_s {
 } Chunk_Element;
 
 // Chunk_Elements contains what elements and how many of them can a chunk of a certain type contain
-// Note: REMEMBER TO FREE chunk_elements MEMORY after it is not needed anymore  
 typedef struct Chunk_Elements_s {
     int chunk_type, max_elements, object_elements_count;
     Chunk_Element *chunk_object_elements;
 } Chunk_Elements;
 
 Chunk_Element chunk_element_arr[GAME_OBJECTS_TOTAL];
+// Note: REMEMBER TO FREE chunk_elements MEMORY after it is not needed anymore  
 Chunk_Elements chunk_elements[CHUNK_TYPE_TOTAL];
 Chunk_Manager generated_chunks;
 static Chunk *current_chunk;
@@ -87,6 +87,8 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y);
 // Get chunk at x and y position
 // Returns: pointer to chunk if chunk was found, else NULL
 static Chunk *get_chunk(int x, int y);
+// Selects random sprite from the all possible ones in the given Game_Object and sets it
+static void select_random_sprite(Game_Object *current_object);
 
 // Chunk Notes:
 // - Chunk consists of SCREEN_WIDTH / 64 x SCREEN_HEIGHT / 64 areas

@@ -40,12 +40,6 @@ int load_map() {
     Chunk *chunk = generate_chunk(PARKOUR, 0, 0);
     generated_chunks.generated_chunks[0] = chunk;
 
-    // Chunk *chunk_2 = generate_chunk(PARKOUR, SCREEN_WIDTH, 0);
-    // generated_chunks.generated_chunks[1] = chunk_2;
-    
-    // Chunk *chunk_3 = generate_chunk(PARKOUR, SCREEN_WIDTH * 2, 0);
-    // generated_chunks.generated_chunks[2] = chunk_3;
-
     current_chunk = chunk;
     return 0;
 }
@@ -249,6 +243,7 @@ Chunk *generate_chunk(int chunk_type, int start_x, int start_y) {
 
             if(counter == 10) continue;
 
+            select_random_sprite(object);
             game_objects.length = game_objects.length + 1;
             game_objects.objects = realloc(game_objects.objects, sizeof(Game_Object *) * game_objects.length);
 
@@ -273,4 +268,10 @@ static Chunk *get_chunk(int x, int y) {
     }
 
     return NULL;
+}
+
+static void select_random_sprite(Game_Object *current_object) {
+    int random_sprite = rand() % current_object->sprites_info.sprites_count;
+    current_object->srcrect.x = random_sprite *
+        (current_object->sprites_info.sprite_width / current_object->sprites_info.sprites_count);
 }
