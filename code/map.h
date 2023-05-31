@@ -8,6 +8,9 @@
 #include "game_object.h"
 #include "player.h"
 
+typedef struct Game_Object_s Game_Object;
+enum Game_Objects;
+
 // Chunk is a SCREEN_WIDTH x SCREEN_HEIGHT place where some type of "room" is generated
 // Depending on the type of "room" some specific objects/items/etc. must be spawned within it
 

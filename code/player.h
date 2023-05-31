@@ -7,6 +7,8 @@
 #include "game_object.h"
 #include "map.h"
 
+typedef struct Game_Object_s Game_Object;
+
 static enum COLLISION_DIRECTIONS {
     NO_COLLISION,
     COLLISION_TOP,
@@ -16,7 +18,7 @@ static enum COLLISION_DIRECTIONS {
 };
 
 typedef struct Player_s {
-    Game_Object player_rect;
+    Game_Object *player_rect;
     // Movement variables
     short int left_movement, right_movement, can_jump;
     // stand_y is a position that the player now stands on (it changes when the player f.e. lands on a block

@@ -3,6 +3,9 @@
 
 #include <SDL.h>
 #include <stdlib.h>
+#include "player.h"
+
+typedef struct Player_s Player;
 
 enum Game_Object_Type {
     BLOCK,
@@ -13,12 +16,12 @@ enum Game_Object_Type {
 };
 
 // All game objects available in the game
-enum Game_Objects {
-    TEST_OBJECT,
-    GRASS_PLATFORM,
-    SPIKE,
-    GAME_OBJECTS_TOTAL
-};
+// enum Game_Objects {
+//     TEST_OBJECT,
+//     GRASS_PLATFORM,
+//     SPIKE,
+//     GAME_OBJECTS_TOTAL
+// };
 
 // Sprites the certain texture can contain (and width/height of the one sprite)
 // Sprite texture is meant to be in one line (only width of the sprite texture (image) should change;
@@ -26,6 +29,17 @@ enum Game_Objects {
 typedef struct Sprites_Info_s {
     int sprite_width, sprite_height, sprites_count;
 } Sprites_Info;
+
+
+// Effects that are execute on player's interaction with the game_object
+// Game_Object is needed earlier in the Game_Object_Effects struct
+typedef struct Game_Object_s Game_Object;
+typedef struct Game_Object_Effects_s {
+    int effects_count;
+    // Custom effect function that is exectued on player's interaction with that block/etc.
+    // Note: REMEMBER TO FREE its MEMORY after the object is not needed anymore
+    void (**custom_effects)(Game_Object, Player);
+} Game_Object_Effects;
 
 typedef struct Game_Object_s {
     int type;
@@ -42,6 +56,7 @@ typedef struct Game_Object_s {
     // f.e. this is useful when texture is a sprite
     SDL_Rect srcrect;
     Sprites_Info sprites_info;
+    Game_Object_Effects interaction_effects;
 } Game_Object;
 
 // Struct to help getting control of the all Game Objects
@@ -62,10 +77,12 @@ static const char *game_objects_paths[GAME_OBJECTS_TOTAL];
 // Loads single game object template to game_object_templates
 // Parameters: game_object represent int of the object from the Game_Objects enum
 static void load_game_object_template(int template_name, int width, int height, int x,
-    int y, int is_rendered, int type, int sprite_width, int sprite_height, int sprites_count);
+    int y, int is_rendered, int type, int sprite_width, int sprite_height, int sprites_count, 
+    int effects_count, ...);
 // Loads all game objects' textures and returns 0 if successful, else 1
 int load_game_objects();
 // Moves all game objects in the x or y position
 void move_game_objects(int x, int y);
+void test(Game_Object a, Player p);
 
 #endif

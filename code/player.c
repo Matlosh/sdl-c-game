@@ -1,19 +1,22 @@
 #include "player.h"
 
 void prepare_player() {
-    Game_Object player_rect = {.width = 64, .height = 64, .x = SCREEN_WIDTH / 2 - 64,
-        .y = SCREEN_HEIGHT - 64};
+    Game_Object *player_rect = malloc(sizeof(Game_Object));
+    player_rect->width = 64;
+    player_rect->height = 64;
+    player_rect->x = SCREEN_WIDTH / 2 - 64;
+    player_rect->y = SCREEN_HEIGHT - 64;
 
     Player player_init = { .left_movement = 0, .right_movement = 0, .can_jump = 1,
-        .max_health = 100, .health = 47, .stand_y = SCREEN_HEIGHT - player_rect.height };
+        .max_health = 100, .health = 47, .stand_y = SCREEN_HEIGHT - player_rect->height };
     player_init.player_rect = player_rect;
 
     player = player_init;
 }
 
 int render_player() {
-    SDL_Rect fill_rect = { .w = player.player_rect.width, .h = player.player_rect.height,
-        .x = player.player_rect.x, .y = player.player_rect.y };
+    SDL_Rect fill_rect = { .w = player.player_rect->width, .h = player.player_rect->height,
+        .x = player.player_rect->x, .y = player.player_rect->y };
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderFillRect(renderer, &fill_rect);
 }
@@ -60,15 +63,15 @@ void move_player() {
     for(int i = 0; i < game_objects.length; i++) {
         Game_Object *object = game_objects.objects[i];
 
-        if(object->type == BLOCK && (get_collision_direction(&player.player_rect, object) == 1))
+        if(object->type == BLOCK && (get_collision_direction(player.player_rect, object) == 1))
             can_fall = 0;
 
         // printf("%d\n", get_collision_direction(&player.player_rect, object));
-        if(object->type == BLOCK && are_objects_overlapping(&player.player_rect, object)) {
-            switch(get_collision_direction(&player.player_rect, object)) {
+        if(object->type == BLOCK && are_objects_overlapping(player.player_rect, object)) {
+            switch(get_collision_direction(player.player_rect, object)) {
                 case COLLISION_TOP:
-                    player.player_rect.y = object->y - player.player_rect.height;
-                    player.stand_y = object->y - player.player_rect.height;
+                    player.player_rect->y = object->y - player.player_rect->height;
+                    player.stand_y = object->y - player.player_rect->height;
                     x = 0;
                     player.can_jump = 1;
                 break;
@@ -95,14 +98,14 @@ void move_player() {
         camera_x += 5;
     }
 
-    if(player.can_jump && can_fall && player.player_rect.y + player.player_rect.height < SCREEN_HEIGHT) {
-        player.player_rect.y += 6;
+    if(player.can_jump && can_fall && player.player_rect->y + player.player_rect->height < SCREEN_HEIGHT) {
+        player.player_rect->y += 6;
         player.stand_y += 6;
     }
 
     // jumping
     if(player.can_jump == 0) {
-        if(player.player_rect.y >= SCREEN_HEIGHT) {
+        if(player.player_rect->y >= SCREEN_HEIGHT) {
             player.can_jump = 1;
             x = 0;
         }
@@ -113,7 +116,7 @@ void move_player() {
             x = 0;
         }
 
-        player.player_rect.y = player.stand_y - get_velocity(x, x_max);
+        player.player_rect->y = player.stand_y - get_velocity(x, x_max);
     }
 
 }

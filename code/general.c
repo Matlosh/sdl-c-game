@@ -41,6 +41,9 @@ void close(SDL_Window **window, SDL_Renderer **renderer) {
     // Implement destroying all available textures (texts, game objects, etc.)
     // Implement freeing memory of game objects and chunks
 
+    // Player
+    free(player.player_rect);
+
     // Information about chunk types
     for(int i = 0; i < GAME_OBJECTS_TOTAL; i++)
         free(chunk_elements[i].chunk_object_elements);
@@ -53,6 +56,19 @@ void close(SDL_Window **window, SDL_Renderer **renderer) {
         free(generated_chunks.generated_chunks[i]);
     }
     free(generated_chunks.generated_chunks);
+
+    // Loaded textures
+    for(int i = 0; i < GAME_OBJECTS_TOTAL; i++) {
+        SDL_DestroyTexture(game_objects_templates[i].texture);
+    }
+
+    // for(int i = 0; i < game_objects.length; i++) {
+    //     printf("???\n");
+    //     printf("%p\n", game_objects.objects[i]);
+    //     // printf("%p\n", game_objects.objects[i]->texture);
+    //     // free(game_objects.objects[i]->interaction_effects);
+    //     free(game_objects.objects[i]);
+    // }
 
     IMG_Quit();
     SDL_Quit();

@@ -1,4 +1,5 @@
 #include "game_object.h"
+#include "player.h"
 
 // All game objects
 static const char *game_objects_paths[GAME_OBJECTS_TOTAL] = {
@@ -8,7 +9,8 @@ static const char *game_objects_paths[GAME_OBJECTS_TOTAL] = {
 };
 
 static void load_game_object_template(int template_name, int width, int height, int x,
-    int y, int is_rendered, int type, int sprite_width, int sprite_height, int sprites_count) {
+    int y, int is_rendered, int type, int sprite_width, int sprite_height, int sprites_count,
+    int effects_count, ...) {
     game_objects_templates[template_name].texture = load_texture(game_objects_paths[template_name]);
     game_objects_templates[template_name].width = width;
     game_objects_templates[template_name].height = height;
@@ -23,12 +25,25 @@ static void load_game_object_template(int template_name, int width, int height, 
     Sprites_Info sprites_info = { .sprite_width = sprite_width, .sprite_height = sprite_height,
         .sprites_count = sprites_count };
     game_objects_templates[template_name].sprites_info = sprites_info;
+
+    game_objects_templates[template_name].interaction_effects.effects_count = effects_count;
+    game_objects_templates[template_name].interaction_effects.custom_effects = malloc(sizeof(void *) * effects_count);
+
+    va_list vl;
+    va_start(vl, effects_count);
+
+    for(int i = 0; i < effects_count; i++)
+        game_objects_templates[template_name].interaction_effects.custom_effects[i] = va_arg(vl, void *);
+
+    va_end(vl);
 }
 
 int load_game_objects() {
-    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BUTTON, 100, 100, 1);
-    load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 0, BLOCK, 128, 32, 4);
-    load_game_object_template(SPIKE, 64, 64, 0, 0, 0, TRAP, 32, 32, 1);
+    load_game_object_template(TEST_OBJECT, 64, 64, 0, 0, 0, BUTTON, 100, 100, 1, 1, &test);
+    load_game_object_template(GRASS_PLATFORM, 64, 64, 0, 0, 0, BLOCK, 128, 32, 4, 0);
+    load_game_object_template(SPIKE, 64, 64, 0, 0, 0, TRAP, 32, 32, 1, 0);
+
+    // game_objects_templates[TEST_OBJECT].interaction_effects.custom_effects[0]();
 
     game_objects.length = 0;
     game_objects.objects = calloc(0, sizeof(Game_Object));
@@ -40,4 +55,8 @@ void move_game_objects(int x, int y) {
         game_objects.objects[i]->x -= x;
         game_objects.objects[i]->y -= y;
     }
+}
+
+void test(Game_Object a, Player p) {
+    printf("a test function!!!11!!\n");
 }

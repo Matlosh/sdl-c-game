@@ -15,6 +15,10 @@
 #include "code/ui.h"
 #include "code/map.h"
 
+int func(int a, int b) {
+    return a + b;
+}
+
 int main(int argc, char *argv[]) {
     if(init(&main_window, &renderer)) return 1;
     if(load_game_objects()) return 1;
@@ -24,18 +28,11 @@ int main(int argc, char *argv[]) {
     prepare_player();
 
     // test
-    // int *array = calloc(4, sizeof(int));
-    // array[0] = 1;
-    // array[1] = 2;
-    // array[2] = 4;
-    // array[3] = 8;
+    // int (*functions[2])(int, int);
+    // int (*custom_func)(int, int);
+    // custom_func = &func;
 
-    // printf("%d %d %d %d\n", array[0], array[1], array[2], array[3]);
-
-    // memmove(&array[1], &array[2], sizeof(int) * 2);
-    // array = realloc(array, sizeof(int) * 3);
-
-    // printf("%d %d %d %d\n", array[0], array[1], array[2], array[3]);
+    // printf("%d\n", custom_func(5, 4));
     //
 
     SDL_Event event;
